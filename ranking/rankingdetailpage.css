@@ -1,0 +1,30 @@
+@media (max-width: 768px) {
+    /* 상세 화면의 컬럼만 강제로 4등분 격자 처리 */
+    div[data-testid="stHorizontalBlock"] {
+        display: grid !important;
+        grid-template-columns: repeat(4, 1fr) !important;
+        gap: 3px !important;
+        width: 100% !important; 
+    }
+    div[data-testid="column"] {
+        width: 100% !important;
+        min-width: 0 !important;
+    }
+    div[data-testid="stImage"] img {
+        width: 100% !important;
+        max-width: 100% !important;
+        height: auto !important;
+        object-fit: contain !important;
+    }
+    div[data-testid="column"] > div[data-testid="stVerticalBlock"] {
+        gap: 0px !important;
+    }
+    div[data-testid="column"] div[data-testid="stMarkdownContainer"] > div {
+        font-size: 0.65rem !important;
+        line-height: 1.1 !important;
+        margin: 0px !important;
+        padding-top: 2px !important;
+        text-align: center !important;
+        word-break: keep-all !important;
+    }
+}

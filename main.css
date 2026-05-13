@@ -1,0 +1,97 @@
+
+/* 💡 마커 바로 밑에 있는 버튼 컬럼을 배경 카드 위로 강제 견인! */
+.btn-pull-up-marker + div[data-testid="stHorizontalBlock"] {
+    margin-top: -65px !important;  /* 🌟 글씨와 겹치면 이 숫자를 -50, -60 등으로 조절하세요 */
+    margin-bottom: 25px !important; /* 다음 카드를 위한 여백 */
+    position: relative !important;
+    z-index: 10 !important; /* 버튼이 배경에 묻히지 않게 최상단으로 띄움 */
+}
+/* 버튼 우측 여백 */
+.btn-pull-up-marker + div[data-testid="stHorizontalBlock"] > div:last-child {
+    padding-right: 15px !important;
+}
+/* 💡 1. 공통 카드 뼈대 */
+.ranking-card {
+    width: 100%; border-radius: 10px; padding: 15px;
+    border: 1px solid rgba(255, 255, 255, 0.15);
+    color: white; text-shadow: 1px 1px 3px black;
+    display: flex; margin-bottom: 5px;
+}
+.card-info { display: flex; align-items: center; }
+.card-chars { display: flex; align-items: center; }
+.card-chars img { border-radius: 5px; }
+
+/* 💻 2. PC 화면 (넓을 때: 캐릭터 크게, 오른쪽으로 쫙 밀기) */
+@media (min-width: 769px) {
+    .ranking-card {
+        flex-direction: row; /* 한 줄로 나란히 */
+        align-items: center !important; /* 세로 중앙 정렬 */
+        padding-right: 130px !important; /* 버튼이 들어갈 오른쪽 자리 비워두기 */
+    }
+    .card-chars { gap: 10px; margin-left: auto !important; }
+    .card-chars img { width: 75px; height: auto; } /* PC용 큼직한 캐릭터! */
+    
+    /* PC는 카드가 더 크니까 버튼도 살짝 더 위로 끌어올림 */
+    .btn-pull-up-marker + div[data-testid="stHorizontalBlock"] {
+        margin-top: -80px !important; margin-bottom: 30px !important; padding-right: 20px !important;
+        position: relative !important; z-index: 10 !important;
+    }
+}
+
+/* 📱 3. 모바일 화면 (좁을 때: 기존처럼 작게, 위아래 2줄로) */
+@media (max-width: 768px) {
+    .ranking-card {
+        flex-direction: column; /* 위아래로 꺾기 */
+    }
+    .card-info { margin-bottom: 10px; }
+    .card-chars { width: 75%; gap: 5px; justify-content: flex-start; }
+    .card-chars img { width: 50px; height: auto; } /* 모바일용 귀여운 캐릭터 */
+    
+    .btn-pull-up-marker + div[data-testid="stHorizontalBlock"] {
+        margin-top: -65px !important; margin-bottom: 25px !important; padding-right: 15px !important;
+        position: relative !important; z-index: 10 !important;
+    }
+}
+    /* 💡 사이드바 메뉴(라디오 버튼) 글자 크기 및 굵기 키우기 */
+[data-testid="stSidebar"] [data-testid="stRadio"] label p {
+    font-size: 1.2rem !important; /* 🌟 글자 크기 (기본은 약 1.0rem 입니다. 1.2~1.4 사이에서 조절해 보세요) */
+    font-weight: 600 !important;  /* 🌟 글자 굵기 (조금 더 또렷하게) */
+}
+
+/* 💡 메뉴 항목 간의 위아래 간격 넓히기 (터치/클릭하기 편하게) */
+[data-testid="stSidebar"] [data-testid="stRadio"] label {
+    margin-bottom: 15px !important; /* 항목 사이의 여백 (기본값보다 훨씬 쾌적해집니다) */
+    cursor: pointer !important;     /* 마우스 올리면 손가락 모양으로 확실하게 변경 */
+}
+
+/* (선택사항) '메뉴를 선택하세요:' 라는 작은 제목도 같이 키우고 싶다면? */
+[data-testid="stSidebar"] [data-testid="stWidgetLabel"] p {
+    font-size: 1.1rem !important;
+    color: #E0E0E0 !important;
+}
+/* 💡 로딩 전후를 자연스럽게 만들어주는 CSS 마법 */
+.char-img {
+    /* 이미지가 로드되기 전까지 보여줄 은은한 회색 바탕 */
+    background-color: #2b2b36; 
+    
+    /* 뼈대(Skeleton)가 깜빡이는 듯한 애니메이션 효과 */
+    animation: pulse 1.5s infinite ease-in-out;
+    
+    /* 기존 이미지 크기에 맞게 설정 (예시 크기, 기존 디자인에 맞추세요) */
+    width: 60px; 
+    height: 60px;
+    border-radius: 5px;
+    object-fit: cover;
+}
+
+/* 뼈대 깜빡임 애니메이션 정의 */
+@keyframes pulse {
+    0% { opacity: 0.6; }
+    50% { opacity: 1; }
+    100% { opacity: 0.6; }
+}
+
+/* 배경 카드 뼈대 효과 (선택 사항) */
+.ranking-card {
+    background-color: #1e1e24; /* 이미지가 뜨기 전 기본 배경색 */
+}

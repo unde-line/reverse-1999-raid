@@ -1,0 +1,54 @@
+/* 💡 1. 뼈대 전체를 세로(column) 배치로 변경 */
+.card_info {
+    display: flex;
+    flex-direction: column; /* 여기서 위아래로 줄바꿈이 일어납니다 */
+    justify-content: center; /* 세로 기준 중앙 정렬 */
+    align-items: flex-start; /* 가로 기준 왼쪽 정렬 */
+    height: 100%;
+    gap: 8px; /* 윗줄(닉네임)과 아랫줄(점수) 사이의 간격 */
+}
+
+/* 💡 2. 새로 추가한 클래스: 랭크와 닉네임을 가로로 유지 */
+.rank_name_wrap {
+    display: flex;
+    align-items: center;
+    gap: 15px; /* 랭크와 닉네임 사이의 간격 */
+}
+
+/* 나머지 기존 클래스들 */
+.rank_number {
+    margin: 0 !important; 
+    padding: 10px !important; 
+    line-height: 1 !important; 
+    color: #FF4B4B !important; 
+    white-space: nowrap !important; 
+    flex-shrink: 0 !important;
+}
+
+.ranking-card {
+     background-size: cover !important;
+     background-position: right center !important;
+}
+
+.nickname {
+    font-size: 1.1em;
+    line-height: 1 !important;
+    white-space: nowrap !important;
+    flex-shrink: 0 !important;
+}
+
+/* 💡 3. 점수는 한 줄을 다 차지하게 되므로 왼쪽 여백 제거 */
+.score {
+    margin: 0 !important;
+    padding: 10px !important;
+    line-height: 1 !important; /* 기존 0에서 1로 수정 (0이면 글자 밑동이 잘릴 수 있음) */
+    color: #E0E0E0;
+}
+
+.porreso{
+    text-align: center !important; 
+    font-weight: bold; 
+    margin-bottom: 5px; 
+    font-size: 0.8em; 
+    line-height: 1.2;
+}

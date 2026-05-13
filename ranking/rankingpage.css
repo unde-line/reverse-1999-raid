@@ -1,0 +1,30 @@
+@media (max-width: 768px) {
+    /* 1. 메인 컨테이너 밖으로 절대 못 나가게 차단 */
+    .stMarkdown div {
+        max-width: 100% !important;
+        overflow: hidden !important;
+    }
+    /* 💡 점수표 카드 배경 마법을 위한 필수 설정 (PC/모바일 공통) */
+    div[data-testid="stVerticalBlockBorderWrapper"] {
+        position: relative !important;
+        background-color: transparent !important; 
+        overflow: hidden !important; 
+    }
+    /* 🚨 추가된 핵심 마법: 컨테이너 '안쪽'의 기본 배경색도 완전히 투명하게 날려버리기! */
+    div[data-testid="stVerticalBlockBorderWrapper"] > div {
+        background-color: transparent !important; 
+    }
+    
+
+    /* 2. 스트림릿 버튼이 위로 올라와서 캐릭터와 나란히 보이게 위치 조정 */
+    div[data-testid="column"] {
+        margin-top: -55px !important; /* 버튼을 캐릭터 줄 높이로 끌어올림 */
+        min-width: 0px !important;
+    }
+
+    /* 3. 전체 박스 하단 여백 충분히 확보 (경계선 보호) */
+    div[data-testid="stVerticalBlockBorderWrapper"] > div {
+        padding-bottom: 15px !important;
+        padding-top: 10px !important;
+    }
+}

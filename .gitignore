@@ -1,0 +1,21 @@
+# 1. 파이썬 가상환경 폴더 (용량 낭비 방지, 올릴 필요 없음)
+.venv/
+venv/
+env/
+
+# 2. 파이썬 실행 찌꺼기 파일들
+__pycache__/
+*.pyc
+
+# 3. 🚨 비밀키, 환경변수 (절대 깃허브에 올라가면 안 됨!)
+.env
+.streamlit/secrets.toml
+secrets.toml
+
+# 4. 시스템 찌꺼기 파일 (혹시 모를 충돌 방지)
+.DS_Store
+Thumbs.db
+rhlaufdmlrnpeh.png
+rmqtjdtjsghdwmd.png
+tlsdkddmldlehd.png
+analytics/
