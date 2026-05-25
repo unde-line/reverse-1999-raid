@@ -29,7 +29,7 @@ def boss_page_display(boss_name=None):
             
         with col2:
             st.subheader("💡 보스 기믹 및 설명")
-            st.write("여기에 보스의 핵심 기믹과 공략법이 들어갈 예정입니다.")
+            st.write("3.5 버전 이후 업데이트 예정입니다.")
             
             st.divider() # 가로줄
             

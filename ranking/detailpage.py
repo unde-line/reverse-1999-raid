@@ -38,7 +38,7 @@ def detail_page_display():
             st.switch_page(prev_page)  # 랭킹 페이지로 돌아가기
 
     with top_col2:
-        base_url= "https://r1999rr.streamlit.app/detail"
+        base_url= "https://r1999rr.streamlit.app"
         deck_url = f"{base_url}/?deck={record['deck_code']}"
 
         # 💡 긴 URL을 완전히 숨기고 커스텀 버튼 디자인과 자바스크립트 동작을 묶어줍니다.
