@@ -2,6 +2,8 @@ import streamlit as st
 from editrecord.register import show_register_popup
 from editrecord.edit import show_edit_popup
 from editrecord.delete import show_delete_popup
+from services.components import go_to_detail_page
+from editrecord.editUI import clear_all_inputs_action
 import services.DB
 
 def edit_page_display():
@@ -52,13 +54,12 @@ def edit_page_display():
                     with col2:
                         # 💡 버튼의 key 값에 고유한 record['id']를 줘서 버튼끼리 안 겹치게 합니다!
                         if st.button("상세", key=f"detail_{record['id']}", width='stretch'):
-                            st.session_state["selected_record"] = record  # 세션 가방에 기록 전체를 넣어줍니다!
-                            st.session_state.previous_page = "pages/toedit.py"  # 이전 페이지 정보도 저장
-                            st.switch_page("pages/detail.py")  # 상세 페이지로 이동!
+                            go_to_detail_page(record, "pages/toedit.py", record['boss_name'])
                     
                     with col3:
                         # 💡 버튼의 key 값에 고유한 record['id']를 줘서 버튼끼리 안 겹치게 합니다!
                         if st.button("✏️ 수정", key=f"edit_{record['id']}", width='stretch'):
+                            st.session_state["current_edit_id"] = None
                             show_edit_popup(record) # 수정 팝업창 호출!
                             
                     with col4:
@@ -68,5 +69,7 @@ def edit_page_display():
         # 이 버튼을 누르면 위에서 만든 팝업 함수가 실행됩니다!
         st.markdown("<br>", unsafe_allow_html=True)
         if st.button("➕ 새 기록 등록", width='stretch', type="primary"):
+            st.session_state["current_edit_id"] = None
+            clear_all_inputs_action(None) # 기존에 만들어둔 전체 초기화 함수 호출
             show_register_popup()
 

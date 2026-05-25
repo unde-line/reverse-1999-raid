@@ -1,7 +1,8 @@
 import streamlit as st 
 from PIL import Image
-from collections import Counter
 import io
+import hashlib
+import time
 
 def load_css(file_path):
     with open(file_path, encoding='utf-8') as f:
@@ -15,7 +16,7 @@ def get_css_text(file_name):
         return f"<style>{f.read()}</style>"
 
 def compress_image(uploaded_file):
-    if uploaded_file is None:
+    if uploaded_file is not None:
         uploaded_file.seek(0)
     # 1. 유저가 올린 사진을 엽니다.
     img = Image.open(uploaded_file)
@@ -38,48 +39,6 @@ def compress_image(uploaded_file):
     
     return img_byte_arr.getvalue()
 
-# 1. 🏆 캐릭터 픽률 순위 정렬 함수
-def sort_by_character_usage(records):
-    """
-    모든 기록을 뒤져서 '가장 많이 사용된 캐릭터' 순서대로 정렬해 돌려줍니다.
-    출력 예시: [('투스페어리', 150), ('곡랑', 120), ('갈기 모래', 85), ...]
-    """
-    all_chars = []
-    for r in records:
-        all_chars.extend(r.get("characters", [])) # 빈 리스트 방어
-        
-    # Counter가 개수를 세고, most_common()이 알아서 1등부터 꼴등까지 정렬해줍니다!
-    return Counter(all_chars).most_common()
-
-
-# 2. ⚔️ 의지 사용률 순위 정렬 함수 (캐릭터와 원리 동일)
-def sort_by_weapon_usage(records):
-    """
-    '가장 많이 사용된 의지' 순서대로 정렬합니다.
-    출력 예시: [('오락 지상주의', 200), ('두 번째 생명', 90), ...]
-    """
-    all_weapons = []
-    for r in records:
-        all_weapons.extend(r.get("weapons", []))
-        
-    return Counter(all_weapons).most_common()
-
-
-# 3. 👥 가장 많이 사용된 덱(조합) 정렬 함수 (이게 진짜 꿀기능입니다!)
-def sort_by_deck_usage(records):
-    """
-    '어떤 4인 조합이 가장 많이 쓰였나?'를 찾아 정렬합니다.
-    출력 예시: [(('갈기 모래', '곡랑', '이졸데', '투스페어리'), 45), ...]
-    """
-    decks = []
-    for r in records:
-        chars = r.get("characters", [])
-        if len(chars) > 0:
-            # 💡 핵심: 픽 순서가 달라도 같은 덱으로 취급하기 위해 정렬(sorted) 후 튜플로 묶어줍니다.
-            deck_combo = tuple(sorted(chars)) 
-            decks.append(deck_combo)
-            
-    return Counter(decks).most_common()
 
 def assign_global_ranks(data):
     """
@@ -108,3 +67,37 @@ def filter_records(data, search_char=None, search_nickname=None):
         filtered = [item for item in filtered if search_nickname in item.get("nickname", "")]
         
     return filtered
+
+def filter_boss_page(boss_number):
+    boss_mapping = {
+        "1": "괴멸의 궤도",
+        "2": "급성 선홍증",
+        "3": "신앙의 이동"
+    }
+    st.session_state["current_link_boss"] = boss_mapping.get(boss_number, None)
+    return 
+
+def to_analyze_recommended_decks(chars, portrays):
+
+    deck_key = ",".join(sorted(chars))
+
+    total_portrays = sum(portrays)
+    return deck_key, total_portrays
+
+
+
+def generate_deck_code(chars, weapons, portrays, resonances, mods):
+    """
+    덱 구성 요소와 현재 시간을 조합해 8자리의 고유 덱 코드를 생성합니다.
+    """
+    # 1. 모든 리스트 요소와 시간을 하나의 긴 문자열로 이어 붙입니다.
+    raw_string = f"{chars}_{weapons}_{portrays}_{resonances}_{mods}_{time.time()}"
+    
+    # 2. SHA-256 방식으로 해싱합니다.
+    hashed_obj = hashlib.sha256(raw_string.encode('utf-8'))
+    
+    # 3. 해시 결과(16진수)에서 앞 8자리만 잘라내고, 대문자로 바꿔서 폼나게 만듭니다.
+    # 예: "a1b2c3d4..." -> "A1B2C3D4"
+    deck_code = hashed_obj.hexdigest()[:8].upper()
+    
+    return deck_code

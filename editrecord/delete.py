@@ -17,7 +17,7 @@ def show_delete_popup(record): # 💡 id 대신 record(데이터 보따리) 전�
                     pure_portray = record["portray_proof_url"].split("/")[-1].split("?")[0]
                     
                     # 도메인 다 떼고 순수 파일명(예: a1b2c.webp)만 넘겨서 완벽하게 삭제!
-                    supabase.storage.from_("raid_proofs").remove([pure_proof, pure_portray])
+                    supabase.storage.from_("raid_proofs").remove([pure_proof, pure_portray])#TODO: 함수로 만들어서 DB.py에 정리하기, register.py에도 똑같은 코드가 있어서 중복이 좀 있습니다.
                     
                     # 🧹 2. 창고를 비웠으니, 이제 DB에서 기록을 삭제!
                     supabase.table("raid_records").delete().eq("id", record["id"]).execute()

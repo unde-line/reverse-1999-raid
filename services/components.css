@@ -12,7 +12,11 @@
 .rank_name_wrap {
     display: flex;
     align-items: center;
-    gap: 15px; /* 랭크와 닉네임 사이의 간격 */
+}
+
+.nickname_wrap {
+    display: flex;
+    align-items: center;
 }
 
 /* 나머지 기존 클래스들 */
@@ -49,6 +53,6 @@
     text-align: center !important; 
     font-weight: bold; 
     margin-bottom: 5px; 
-    font-size: 0.8em; 
+    font-size: 0.9em; 
     line-height: 1.2;
 }

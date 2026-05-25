@@ -2,30 +2,10 @@ from numpy import record
 import streamlit as st
 from services.components import draw_character_card
 from services.utils import load_css
-import services.DB
 
 def detail_page_display():
     
     record = None
-    
-    # ==========================================
-    # 💡 1. URL 꼬리표(Query Params)가 있는지 먼저 확인합니다! (친구한테 링크 받고 온 사람)
-    # ==========================================
-    url_user = st.query_params.get("user")
-    url_boss = st.query_params.get("boss")
-    
-    if url_user and url_boss:
-        # DB에서 해당 보스의 기록들을 싹 가져옵니다.
-        board_data = services.DB.load_board_data()
-        boss_records = board_data.get(url_boss, [])
-        
-        # 가져온 기록 중에서 닉네임이 일치하는 사람을 찾습니다!
-        for r in boss_records:
-            if r["nickname"] == url_user:
-                record = r
-                record["boss_name"] = url_boss
-                break
-
     # ==========================================
     # 💡 2. 꼬리표가 없다면? 세션 가방을 확인합니다! (랭킹 페이지에서 버튼 누르고 온 사람)
     # ==========================================
@@ -50,9 +30,63 @@ def detail_page_display():
     # ==========================================
     prev_page = st.session_state.get("previous_page", "pages/rank.py")  # 이전 페이지 정보가 없으면 랭킹 페이지로 기본 설정
 
-    if st.button("⬅️ 이전 페이지로 돌아가기"):
-        st.query_params.clear()  # URL 꼬리표 초기화
-        st.switch_page(prev_page)  # 랭킹 페이지로 돌아가기
+    top_col1, top_col2 = st.columns([4,6], vertical_alignment="center")
+    
+    with top_col1:
+        if st.button("⬅️ 이전 페이지로 돌아가기"):
+            st.query_params.clear()  # URL 꼬리표 초기화
+            st.switch_page(prev_page)  # 랭킹 페이지로 돌아가기
+
+    with top_col2:
+        base_url= "https://r1999rr.streamlit.app/detail"
+        deck_url = f"{base_url}/?deck={record['deck_code']}"
+
+        # 💡 긴 URL을 완전히 숨기고 커스텀 버튼 디자인과 자바스크립트 동작을 묶어줍니다.
+        custom_copy_button = f"""
+        <style>
+        .copy-btn {{
+            width: 100%;
+            background-color: #FF4B4B; /* 스트림릿 고유의 예쁜 레드 포인트 컬러 */
+            color: white;
+            border: none;
+            padding: 8px 16px;
+            font-size: 15px;
+            font-weight: bold;
+            border-radius: 8px; /* 둥근 모서리 */
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }}
+        .copy-btn:hover {{
+            background-color: #FF3333; /* 마우스 올렸을 때 살짝 진해짐 */
+        }}
+        </style>
+        
+        <button class="copy-btn" id="copy-btn" onclick="copyURL()">
+            🔗 덱 코드 공유 링크 복사하기
+        </button>
+
+        <script>
+        function copyURL() {{
+            // 숨겨진 deck_url을 클립보드에 복사합니다.
+            navigator.clipboard.writeText('{deck_url}').then(function() {{
+                var btn = document.getElementById('copy-btn');
+                
+                // 💡 [클릭 시 애니메이션] 텍스트가 바뀌고 초록색으로 변합니다!
+                btn.innerText = '✅ 링크가 복사되었습니다!';
+                btn.style.backgroundColor = '#00CC66'; 
+                
+                // 2초 뒤에 원래 버튼 상태로 조용히 돌아갑니다.
+                setTimeout(function() {{
+                    btn.innerText = '🔗 덱 코드 공유 링크 복사하기';
+                    btn.style.backgroundColor = '#FF4B4B';
+                }}, 2000);
+            }});
+        }}
+        </script>
+        """
+        
+        # iframe(웹 페이지 속의 웹 페이지) 형태로 렌더링하며 높이를 기본 버튼과 똑같이 45px로 고정합니다.
+        st.iframe(custom_copy_button, height=50)
         
     st.write("---")
     

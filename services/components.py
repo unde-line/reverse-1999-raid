@@ -1,7 +1,7 @@
 import streamlit as st
-from services.DB import CHAR_IMG, WEAPON_IMG
+from services.DB import CHAR_IMG, WEAPON_IMG, PATTERN_DICT, CHAR_BLOCKS
 import html
-from services.utils import load_css, get_css_text
+from services.utils import get_css_text
 
 css_text = get_css_text('services/components.css')  # CSS 텍스트를 캐싱된 함수로 가져오기
 
@@ -15,7 +15,10 @@ def build_rank_html(real_rank):
     if real_rank is None:
         return "", "0px"
     
-    return(real_rank, "0px")
+    if isinstance(real_rank, int) or (isinstance(real_rank, str) and real_rank.isdigit()):
+        return f"#{real_rank}", "0px"
+    else:
+        return real_rank, "0px"
 
 
 def draw_ranking_card(item, bg_url, real_rank=None):
@@ -29,8 +32,10 @@ def draw_ranking_card(item, bg_url, real_rank=None):
     <div class="ranking-card" style="background: linear-gradient(to right, rgba(14, 17, 23, 0.95) 25%, rgba(14, 17, 23, 0.4) 70%, rgba(14, 17, 23, 0) 100%), url('{bg_url}');">
         <div class="card_info">
             <div class="rank_name_wrap">
-                <h4 class="rank_number">#{rank_html}</h4>
-                <strong class="nickname" style="margin-left: {nickname_margin};">{nickname}</strong>
+                <h4 class="rank_number">{rank_html}</h4>
+                <div class = "nickname_wrap">
+                    <strong class="nickname" style="margin-left: {nickname_margin};">{nickname}</strong>
+                    </div>
             </div>
             <h5 class="score">{score}</h5>
         </div>
@@ -52,6 +57,9 @@ def draw_character_card(record):
             portray_val = record['portrays'][i] 
             reso_val = record['resonances'][i]  
 
+            # 💡 안전장치: 예전 데이터에 변조 컬럼이 비어있을 경우를 대비해 '게시하지 않음'를 기본값으로 가져옵니다.
+            mod_val = record.get('resonances_mods', ["게시하지 않음", "게시하지 않음", "게시하지 않음", "게시하지 않음"])[i]
+
             if reso_val == 0:
                 reso_text = "공명 게시하지 않음"
             else:
@@ -66,6 +74,45 @@ def draw_character_card(record):
             st.markdown(f"<div class='porreso'>{info_text}</div>", unsafe_allow_html=True)
                 
             st.image(WEAPON_IMG[record['weapons'][i]], width='stretch')
+
+            # ==========================================================
+            # 💡 2. 공명 변조 아이콘 표시 (공명 10레벨 이상일 때만)
+            # ==========================================================
+            if reso_val >= 10:
+                char_name = record['characters'][i]
+                char_block = CHAR_BLOCKS.get(char_name, "").strip()
+                
+                mod_img_url = None
+                
+                # 💡 해당 기호의 방(리스트)에 들어가서, 이름이 일치하는 URL을 찾습니다.
+                if char_block in PATTERN_DICT:
+                    for pat in PATTERN_DICT[char_block]:
+                        if pat["name"] == mod_val:
+                            mod_img_url = pat["url"]
+                            break
+                
+                # URL을 성공적으로 찾았다면 그려줍니다!
+                if mod_img_url:
+                    mod_html = f"""
+                    <div style='margin-top: 6px; margin-bottom: 6px; height: 110px; display: flex; justify-content: center; align-items: center;' title='공명 변조: {mod_val}'>
+                        <img src='{mod_img_url}' style='width: 100px; max-height: 100px; object-fit: contain; border-radius: 6px; box-shadow: 0 2px 4px rgba(0,0,0,0.2);'>
+                    </div>
+                    """
+                    st.markdown(mod_html, unsafe_allow_html=True)
+                    st.markdown(f"<div class='porreso'>{mod_val}</div>", unsafe_allow_html=True)
+                elif reso_val >= 10 and mod_val == "게시하지 않음":
+                    st.markdown(f"<div class='porreso'>공명 변조 게시하지 않음</div>", unsafe_allow_html=True)
+                else:
+                    debug_msg = f"""
+                    <div style='color: #FF4B4B; font-size: 11px; text-align: center; margin-top: 10px; line-height: 1.2;'>
+                        🚨 매칭 실패<br>
+                        이름: {char_name}<br>
+                        블록: [{char_block}]<br>
+                        변조: {mod_val}
+                    </div>
+                    """
+                    st.markdown(debug_msg, unsafe_allow_html=True)
+
                 
         st.markdown('</div>', unsafe_allow_html=True)
 
@@ -158,3 +205,10 @@ def sync_resonance(char_idx, source, context="reg", record_id=None):
     if new_val is not None:
         st.session_state[slider_key] = new_val # 슬라이더 가방 업데이트
         st.session_state[input_key] = new_val  # 입력칸 가방 업데이트
+
+def go_to_detail_page(item, prev_page, boss_name):
+    item['boss_name'] = boss_name
+    st.session_state.selected_record = item  # 선택한 기록을 세션에 저장
+    st.session_state.previous_page = prev_page  # 이전 페이지 정보도 저장
+    
+    st.switch_page("pages/detail.py")  # 상세 페이지로 이동 
