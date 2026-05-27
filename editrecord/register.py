@@ -76,7 +76,7 @@ def show_register_popup():
     st.markdown("### 📸 인증 사진 첨부")
 
     proof_b64 = get_image_base64("proof_image_help.webp")
-    portray_b64 = get_image_base64("portray_help_img.png")
+    portray_b64 = get_image_base64("portray_help_img.webp")
 
     proof_help_msg = f"""
     **[인증 캡처 예시]** 아래 사진처럼 레이드 결과창 전체가 선명하게 보이도록 캡처해 주세요!
@@ -87,7 +87,7 @@ def show_register_popup():
     portray_help_msg = f"""
     **[형상 캡처 예시]** 핀 기능을 이용하여 참가한 4명의 캐릭터가 모두 화면에 나오게 찍어주세요.
 
-    ![형상 인증 예시](data:image/png;base64,{portray_b64})
+    ![형상 인증 예시](data:image/webp;base64,{portray_b64})
     """
     
     proof_img = st.file_uploader(
