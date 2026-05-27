@@ -3,6 +3,7 @@ from PIL import Image
 import io
 import hashlib
 import time
+from services.config import CURRENT_SEASON_BOSSES
 
 def load_css(file_path):
     with open(file_path, encoding='utf-8') as f:
@@ -69,11 +70,7 @@ def filter_records(data, search_char=None, search_nickname=None):
     return filtered
 
 def filter_boss_page(boss_number):
-    boss_mapping = {
-        "1": "괴멸의 궤도",
-        "2": "급성 선홍증",
-        "3": "신앙의 이동"
-    }
+    boss_mapping = {str(i + 1): boss for i, boss in enumerate(CURRENT_SEASON_BOSSES)}
     st.session_state["current_link_boss"] = boss_mapping.get(boss_number, None)
     return 
 

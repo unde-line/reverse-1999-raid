@@ -1,0 +1,43 @@
+/* 💡 스트림릿 컬럼을 강제하는 위험한 @media 코드는 전부 삭제했습니다! */
+
+.deck-row {
+    display: flex;
+    justify-content: space-between; /* 4명을 일정한 간격으로 벌립니다 */
+    align-items: flex-start;
+    width: 100%;
+    gap: 4px; /* 모바일에서도 겹치지 않을 최소한의 간격 */
+}
+
+.stat_info {
+    display: flex;
+    flex-direction: column; 
+    align-items: center; 
+    justify-content: flex-start; 
+    text-align: center;
+    width: 24%; /* 💡 4명이 100% 공간을 공평하게 나눠 가짐 */
+    overflow: hidden;
+}
+
+.image_stat {
+    width: 100%; 
+    max-width: 65px; 
+    border-radius: 8px; 
+    margin-bottom: 6px; 
+    box-shadow: 0 2px 4px rgba(0,0,0,0.3);
+    object-fit: cover;
+}
+
+.char_caption {
+    white-space: normal; /* 모바일에서 이름 줄바꿈 허용 */
+    word-break: keep-all;
+    font-size: 12px;
+    font-weight: bold;
+    margin: 4px 0;
+    line-height: 1.2;
+}
+
+.weapon_stat {
+    width: 100%;
+    max-width: 45px;
+    object-fit: contain;
+}

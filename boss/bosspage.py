@@ -4,9 +4,12 @@ import streamlit as st
 from services.DB import get_character_pickrate, get_recommended_decks, get_hall_of_fame_data, CHAR_IMG, WEAPON_IMG, call_records
 from services.config import BOSS_BG_URLS
 from services.components import draw_ranking_card, go_to_detail_page
+from services.utils import load_css
+
 
 
 def boss_page_display(boss_name=None):
+    load_css('boss/bosspage.css')
     if st.button("⬅️ 메인으로 돌아가기"):
         st.session_state.pop("current_boss", None)
         st.switch_page("pages/menu.py")
@@ -36,24 +39,26 @@ def boss_page_display(boss_name=None):
             st.subheader("👑 가장 많이 사용된 캐릭터 TOP 3")
             # TOP 3 자리표시자
             if character_pickrates and len(character_pickrates) >= 3:
-                top1, top2, top3 = st.columns(3)
-                cols = [top1, top2, top3]
                 
                 # 1위부터 3위까지 반복문 돌면서 데이터 매칭
+                top3_html= "<div class='deck-row' style = 'justify-content: space-evenly;'>"
                 for i, row in enumerate(character_pickrates[:3]):
-                    with cols[i]:
-                        # 캐릭터 초상화 (나중에 실제 캐릭터 이미지 URL 구조로 교체하세요!)
-                        st.markdown(f'<img src="{CHAR_IMG.get(row['char_name'])}" style="width: 60px; border-radius: 10px; margin-bottom: 8px; display: block; margin: 0 auto;">', unsafe_allow_html=True)
-                        
-                        # 줄바꿈 없이 깔끔하게 한 줄로 이름, 픽률, 의지까지 출력
-                        stat_html = f"""
-                        <div style="text-align: center; line-height: 1.5; margin-top: 8px;">
-                            <span style="font-size: 16px; font-weight: bold;">{row['rank']}위: {row['char_name']}</span><br>
-                            <span style="color: #eab308; font-weight: 500; font-size: 14px;">📊 {row['pick_rate']}%</span><br>
-                            <img src = '{WEAPON_IMG.get(row['best_weapon'])}' width='60'>
-                        </div>
-                        """
-                        st.markdown(stat_html, unsafe_allow_html=True)
+                    # 캐릭터 초상화 (나중에 실제 캐릭터 이미지 URL 구조로 교체하세요!)
+                    c_name = row['char_name']
+                    c_img = CHAR_IMG.get(c_name)
+                    w_img = WEAPON_IMG.get(row['best_weapon'])
+                    
+                    # 줄바꿈 없이 깔끔하게 한 줄로 이름, 픽률, 의지까지 출력
+                    top3_html += f"""
+<div class="stat_info" style="width: 30%;">
+    <img src="{c_img}" class="image_stat">
+    <span style="font-size: 13px; font-weight: bold; line-height: 1.2; margin-top: 4px;">{row['rank']}위:<br>{c_name}</span>
+    <span style="color: #eab308; font-weight: 500; font-size: 12px; margin: 4px 0;">📊 {row['pick_rate']}%</span>
+    <img src="{w_img}" class="weapon_stat">
+</div>
+"""
+                top3_html += "</div>"
+                st.markdown(top3_html, unsafe_allow_html=True)
             
             # 💡 아직 자정이 안 지났거나 데이터가 부족해서 테이블이 비어있을 때
             else:
@@ -77,15 +82,20 @@ def boss_page_display(boss_name=None):
             stable_weapons = stable_info.get("weapons")
             
             if stable_chars and stable_weapons:
-                c1, c2, c3, c4 = st.columns(4)
-                
                 # zip을 써서 캐릭터와 의지를 한 번에 묶어서 출력합니다.
-                cols = [c1, c2, c3, c4]
-                for i, (char, weapon) in enumerate(zip(stable_chars, stable_weapons)):
-                    with cols[i]:
-                        st.image(CHAR_IMG.get(char, "https://via.placeholder.com/80"))
-                        st.caption(f"<div style='text-align: center; white-space: nowrap; font-size:14px; margin-bottom: 5px;'>{char}</div>", unsafe_allow_html=True)
-                        st.markdown(f"<img src='{WEAPON_IMG.get(weapon, 'https://via.placeholder.com/60')}' width='60'>", unsafe_allow_html=True)
+                deck_stable_html = "<div class='deck-row'>"
+                for char, weapon in zip(stable_chars, stable_weapons):
+                    c_stable_img = CHAR_IMG.get(char)
+                    w_stable_img = WEAPON_IMG.get(weapon)
+                    deck_stable_html += f"""
+<div class="stat_info">
+    <img src="{c_stable_img}" class="image_stat">
+    <div class="char_caption">{char}</div>
+    <img src="{w_stable_img}" class="weapon_stat">
+</div>
+"""
+                deck_stable_html += "</div>"
+                st.markdown(deck_stable_html, unsafe_allow_html=True)
     with rec2:
         with st.container(border=True):
             st.markdown("#### 🔹 3,000만 점 고점 돌파")
@@ -96,14 +106,19 @@ def boss_page_display(boss_name=None):
             high_weapons = high_info.get("weapons")
             
             if high_chars and high_weapons:
-                c1, c2, c3, c4 = st.columns(4)
-                
-                cols = [c1, c2, c3, c4]
-                for i, (char, weapon) in enumerate(zip(high_chars, high_weapons)):
-                    with cols[i]:
-                        st.image(CHAR_IMG.get(char, "https://via.placeholder.com/80"))
-                        st.caption(f"<div style='text-align: center; white-space: nowrap; font-size:14px; margin-bottom: 5px;'>{char}</div>", unsafe_allow_html=True)
-                        st.markdown(f"<img src='{WEAPON_IMG.get(weapon, 'https://via.placeholder.com/60')}' width='60'>", unsafe_allow_html=True)
+                deck_high_html = "<div class='deck-row'>"
+                for char, weapon in zip(high_chars, high_weapons):
+                    c_high_img = CHAR_IMG.get(char)
+                    w_high_img = WEAPON_IMG.get(weapon)
+                    deck_high_html += f"""
+<div class="stat_info">
+    <img src="{c_high_img}" class="image_stat">
+    <div class="char_caption">{char}</div>
+    <img src="{w_high_img}" class="weapon_stat">
+</div>
+"""
+                deck_high_html += "</div>"
+                st.markdown(deck_high_html, unsafe_allow_html=True)
     st.write("")
 
     # ==========================================
