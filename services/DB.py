@@ -62,6 +62,18 @@ def load_board_data():
         
     return grouped_dict
 
+def find_deck_in_DB(target_code):
+    response = supabase.table("raid_records").select("*").eq("deck_code", target_code).limit(1).execute()
+
+    if response.data:
+        record = response.data[0]
+        st.session_state["selected_record"] = record
+        st.switch_page("pages/detail.py")
+
+    else:
+        st.query_params.clear()
+        st.switch_page("pages/error.py")
+
 def delete_storage_image(image_url):
     """URL을 받아서 스토리지에서 조용히 삭제해주는 함수"""
     if not image_url or "http" not in image_url:
@@ -110,48 +122,29 @@ def search_my_records(nickname):
     response = supabase.table("raid_records").select("*").eq("nickname", nickname).execute()
     return response.data
 
+def submit_result_of_my_record(status, mode, data, record_id=None):
+    if status:
+        try:
+            if mode == "register":
+                supabase.table("raid_records").insert(data).execute()
+                st.success("🎉 기록 등록 완료!")
+                st.session_state.pop("random_nickname", None)
+                if "preset_data" in st.session_state:
+                    del st.session_state["preset_data"]
+            else:
+                supabase.table("raid_records").update(data).eq("id", record_id).execute()
+                st.success("🎉 수정이 완료되었습니다!")
+            import time
+            time.sleep(1.5)
+            
+            deck_code=data.get("deck_code")
+            find_deck_in_DB(deck_code)
 
-def insert_new_record(boss, score, nickname, password, selected_chars, selected_weapons, portrays, resonances, user_comment, youtube_url, proof_url, portray_url, deck_key, total_portrays, selected_mods, deck_code):
-    insert_data = {
-        "boss_name": boss,
-        "score": score,
-        "nickname": nickname,
-        "password": password,
-        "characters": selected_chars,       # 리스트 형태 [캐1, 캐2, 캐3, 캐4]
-        "weapons": selected_weapons,   # 리스트 형태 [의1, 의2, 의3, 의4]
-        "portrays": portrays,          # 리스트 형태 [형1, 형2, 형3, 형4]
-        "resonances": resonances,      # 리스트 형태 [공1, 공2, 공3, 공4]
-        "proof_url": proof_url,
-        "portray_proof_url": portray_url,
-        "comment": user_comment,      # 유저 코멘트 추가
-        "video_url": youtube_url,   # 유튜브 링크 추가
-        "status": 0,           # 관리자 승인 전까지는 게시판에 안 보이게 설정
-        "deck_key": deck_key,
-        "total_portrays": total_portrays,
-        "resonances_mods": selected_mods,
-        "deck_code": deck_code
-    }
-    supabase.table("raid_records").insert(insert_data).execute()
+        except Exception as e:
+            st.error(f"DB 등록 중 오류가 발생했습니다.{e}")
+    else:
+        st.error(data)
 
-def edit_data(record_id, new_boss, new_score, new_chars, new_weapons, new_portrays, new_resonances, new_comment, new_youtube, new_proof_url, new_portray_url, new_deck_key, new_total_portrays, new_selected_mods, new_deck_code):
-    update_data = {
-        "boss_name": new_boss,
-        "score": new_score,
-        "characters": new_chars,
-        "weapons": new_weapons,
-        "portrays": new_portrays,
-        "resonances": new_resonances,
-        "comment": new_comment,
-        "video_url": new_youtube,
-        "proof_url": new_proof_url,
-        "portray_proof_url": new_portray_url,
-        "status": 0,           # 수정된 기록은 다시 관리자의 승인을 받아야 게시판에 보이도록 설정
-        "deck_key": new_deck_key,
-        "total_portrays": new_total_portrays,
-        "resonances_mods": new_selected_mods,
-        "deck_code": new_deck_code
-    }
-    supabase.table("raid_records").update(update_data).eq("id", record_id).execute()
 
 def get_recommended_decks(boss_name):
     recommended_data = {"stable_deck": None, "high_score_deck": None}
@@ -199,7 +192,8 @@ def get_character_pickrate(boss_name):
     except Exception as e:
         st.error(f"캐릭터 픽률 정보를 불러오지 못했습니다.{e}")
         return []
-    
+
+@st.cache_data(ttl=3600)    
 def get_hall_of_fame_data(boss_name):
     """
     명예의 전당 ID를 이용해 원본 기록의 닉네임, 점수, 덱 정보를 한 번에 가져옵니다.
@@ -230,7 +224,7 @@ def get_hall_of_fame_data(boss_name):
         return hof_dict
         
     except Exception as e:
-        st.error(f"명예의 전당 데이터를 불러오지 못했습니다: {e}")
+        st.error(f"명예의 전당 데이터를 불러오지 못했습니다.")
         return {}
     
 def call_records(record_id):
@@ -250,17 +244,7 @@ def call_records(record_id):
         st.error(f"데이터를 가져오는 중 오류가 발생했습니다: {e}")
         return None
     
-def find_deck_in_DB(target_code):
-    response = supabase.table("raid_records").select("*").eq("deck_code", target_code).limit(1).execute()
 
-    if response.data:
-        record = response.data[0]
-        st.session_state["selected_record"] = record
-        st.switch_page("pages/detail.py")
-
-    else:
-        st.query_params.clear()
-        st.switch_page("pages/error.py")
 
 def code_to_deck(input_deck_val):
     if input_deck_val:

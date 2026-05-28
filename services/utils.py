@@ -3,6 +3,7 @@ from PIL import Image
 import io
 import hashlib
 import time
+import base64
 from services.config import CURRENT_SEASON_BOSSES
 
 def load_css(file_path):
@@ -98,3 +99,7 @@ def generate_deck_code(chars, weapons, portrays, resonances, mods):
     deck_code = hashed_obj.hexdigest()[:8].upper()
     
     return deck_code
+
+def get_image_base64(image_path):
+    with open(image_path, "rb") as img_file:
+        return base64.b64encode(img_file.read()).decode('utf-8')

@@ -6,6 +6,5 @@ def error_page_display():
     if st.button("메인 화면으로 돌아가기", icon="🏠"):
         st.query_params.clear()
         st.switch_page("pages/menu.py")  # 랭킹 페이지로 돌아가기
-    st.stop()
 
 error_page_display()

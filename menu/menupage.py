@@ -11,7 +11,7 @@ def menu_page_display():
     btn_col1, btn_col2 = st.columns([8, 2])
     with btn_col1:
         st.title("리버스: 1999 레이드 기록소")
-        st.subheader("3.4버전 불로춘 갈기의 게시판 진행 상황")
+        st.subheader("3.5버전 <터과이즈 뱀 클럽> 갈기의 게시판 진행 상황")
 
     with btn_col2:
         if st.button("💡 이용 가이드", width='stretch'):
@@ -36,7 +36,7 @@ def menu_page_display():
     # 2. 리스트를 돌면서 순서대로(i) 보스 이름(boss_name)을 꺼내서 카드를 그립니다.
     for i, boss_name in enumerate(CURRENT_SEASON_BOSSES):
         with cols[i]:
-            st.markdown(f"<h2 style='text-align: center;'>{boss_name}</h3>", unsafe_allow_html=True)
+            st.markdown(f"<h3 style='text-align: center;'>{boss_name}</h3>", unsafe_allow_html=True)
             
             # 💡 i는 0부터 시작하므로, 주소창에 넘길 boss 번호는 i + 1 로 맞춰줍니다. (1, 2, 3...)
             img_html = f"""

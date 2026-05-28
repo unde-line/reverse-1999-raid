@@ -1,4 +1,3 @@
-from numpy import record
 import streamlit as st
 from services.components import draw_character_card
 from services.utils import load_css
@@ -100,27 +99,29 @@ def detail_page_display():
     st.markdown("### 👥 사용 덱 및 형상")
         
     draw_character_card(record) # 이 함수는 이제 record에서 바로 캐릭터/의지/형상/공명 정보를 꺼내서 그려줍니다!
+
+    if record['status'] == 1:
+
+        st.write("") 
+        st.markdown(f"**💬 유저 코멘트:** {record['comment']}")
+        st.write("---")
         
-    st.write("") 
-    st.markdown(f"**💬 유저 코멘트:** {record['comment']}")
-    st.write("---")
-    
-    # ==========================================
-    # 💡 수정된 부분: DB에서 개별 사진을 불러옵니다!
-    # ==========================================
-    st.markdown("### 📸 인증 스크린샷")
-    if record.get("proof_url"):
-        st.image(record["proof_url"], width= 'stretch')
-    else:
-        st.info("등록된 스크린샷이 없습니다.")
-    st.write("---")
-    # ==========================================
-    
-    # 3. 플레이 영상 (세로 배치 3단)
-    st.markdown("### 🎬 플레이 영상")
-    if record["video_url"]: # 비디오 링크가 있으면 플레이어를 띄움
-        # 스트림릿은 유튜브 링크나 mp4 링크를 넣으면 알아서 플레이어를 만들어 줍니다!
-        st.video(record["video_url"])
-    else:
-        st.info("등록된 영상이 없습니다.")
+        # ==========================================
+        # 💡 수정된 부분: DB에서 개별 사진을 불러옵니다!
+        # ==========================================
+        st.markdown("### 📸 인증 스크린샷")
+        if record.get("proof_url"):
+            st.image(record["proof_url"], width= 'stretch')
+        else:
+            st.info("등록된 스크린샷이 없습니다.")
+        st.write("---")
+        # ==========================================
+        
+        # 3. 플레이 영상 (세로 배치 3단)
+        st.markdown("### 🎬 플레이 영상")
+        if record["video_url"]: # 비디오 링크가 있으면 플레이어를 띄움
+            # 스트림릿은 유튜브 링크나 mp4 링크를 넣으면 알아서 플레이어를 만들어 줍니다!
+            st.video(record["video_url"])
+        else:
+            st.info("등록된 영상이 없습니다.")
 

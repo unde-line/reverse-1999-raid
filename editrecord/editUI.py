@@ -1,108 +1,10 @@
 import streamlit as st
-from services.DB import get_recommended_decks_preset, CHAR_IMG, WEAPON_IMG, CHAR_BLOCKS, PATTERN_DICT, CHAR_REC_MODS
+from services.DB import CHAR_IMG, WEAPON_IMG, CHAR_BLOCKS, PATTERN_DICT, code_to_deck
 from services.components import sync_resonance
+from services.utils import get_image_base64
+from editrecord.editsystem import confirm_clear_callback, confirm_preset_callback, cancel_clear_callback, cancel_preset_callback
+from services.config import CURRENT_SEASON_BOSSES
 
-def apply_preset_action(boss_name, deck_type):
-    preset = get_recommended_decks_preset(boss_name, deck_type)
-    
-    if preset:
-        chars = preset.get("chars", [])
-        weapons = preset.get("weapons", [])
-        
-        # 💡 핵심: 위젯의 key(char_0, weap_0 등)에 데이터를 다이렉트로 덮어씌웁니다!
-        for i in range(4):
-            char_name = "🔎검색..." # 기본값 세팅
-            # 캐릭터 주입
-            if len(chars) > i:
-                char_name = chars[i]
-                st.session_state[f"char_{i}"] = char_name
-            # 의지 주입
-            if len(weapons) > i:
-                st.session_state[f"weap_{i}"] = weapons[i]
-            
-            # 공명 레벨 주입 (정석은 10, 고점은 13)
-            res_level = 10 if deck_type == "stable" else 13
-            st.session_state[f"res_slider_reg_{i}"] = res_level
-            st.session_state[f"res_input_reg_{i}"] = res_level
-            # ==========================================================
-            # 💡 4. [추가] 공명 변조 주입 (캐릭터 DB 연동)
-            # ==========================================================
-            if char_name != "🔎검색...":
-                # CHAR_REC_MODS 딕셔너리에서 해당 캐릭터의 추천 변조를 가져옵니다. (없으면 기본값)
-                recommended_mod = CHAR_REC_MODS.get(char_name, "게시하지 않음")
-                st.session_state[f"mod_{i}"] = recommended_mod
-            else:
-                st.session_state[f"mod_{i}"] = "게시하지 않음"
-            # ==========================================================
-
-        # 초기화 버튼 표시를 위해 세션에 남겨둠
-        st.session_state["preset_data"] = preset
-    else:
-        st.toast(f"아직 [{boss_name}]의 덱 데이터가 없습니다!", icon="🚨")
-
-def clear_all_inputs_action(original_record=None):
-    if "preset_data" in st.session_state:
-        del st.session_state["preset_data"]
-        
-    for i in range(4):
-        if original_record:
-            # 💡 [수정 모드] 원래 DB에 있던 기록으로 복구!
-            st.session_state[f"char_{i}"] = original_record["characters"][i] if i < len(original_record["characters"]) else "🔎검색..."
-            st.session_state[f"weap_{i}"] = original_record["weapons"][i] if i < len(original_record["weapons"]) else "🔎검색..."
-            st.session_state[f"port_{i}"] = original_record["portrays"][i] if i < len(original_record["portrays"]) else 0
-            
-            initial_res = original_record.get("resonances", [0,0,0,0])[i] if i < len(original_record.get("resonances", [])) else 0
-            st.session_state[f"res_slider_reg_{i}"] = initial_res
-            st.session_state[f"res_input_reg_{i}"] = initial_res
-            # ==========================================================
-            # 💡 [추가] 공명 변조 원본 복구
-            # ==========================================================
-            mods_list = original_record.get("resonances_mods", ["게시하지 않음"] * 4)
-            st.session_state[f"mod_{i}"] = mods_list[i] if i < len(mods_list) else "게시하지 않음"
-        else:
-            # 💡 [등록 모드] 완전 빈칸으로 초기화!
-            st.session_state[f"char_{i}"] = "🔎검색..."
-            st.session_state[f"weap_{i}"] = "🔎검색..."
-            st.session_state[f"port_{i}"] = 0
-            st.session_state[f"res_slider_reg_{i}"] = 0
-            st.session_state[f"res_input_reg_{i}"] = 0
-            # ==========================================================
-            # 💡 [추가] 공명 변조 빈칸 초기화
-            # ==========================================================
-            st.session_state[f"mod_{i}"] = "게시하지 않음"
-        if original_record:
-            st.session_state["edit_boss"] = original_record["boss_name"]
-            st.session_state["edit_score"] = int(original_record["score"])
-
-def confirm_preset_callback(boss_name, deck_type):
-    # '예'를 눌렀을 때 엔진을 가동하고, 대기 상태를 해제합니다.
-    apply_preset_action(boss_name, deck_type)
-    if "pending_preset" in st.session_state:
-        del st.session_state["pending_preset"]
-
-def cancel_preset_callback():
-    # '아니요'를 눌렀을 때 대기 상태만 없앱니다.
-    if "pending_preset" in st.session_state:
-        del st.session_state["pending_preset"]
-
-def confirm_clear_callback():
-    # '예'를 누르면 진짜로 다 밀어버리고 대기 상태 해제
-    clear_all_inputs_action()
-    if "pending_clear" in st.session_state:
-        del st.session_state["pending_clear"]
-
-def cancel_clear_callback():
-    # '아니요'를 누르면 복구하지 않고 경고창만 닫기
-    if "pending_clear" in st.session_state:
-        del st.session_state["pending_clear"]
-
-def confirm_clear_callback(original_record=None):
-    # original_record를 받아서 엔진으로 넘겨줍니다.
-    clear_all_inputs_action(original_record)
-    if "pending_clear" in st.session_state:
-        del st.session_state["pending_clear"]
-
-# 프리셋 버튼 UI를 그려주는 함수
 def draw_preset_buttons(selected_boss, original_record=None):
     st.caption(f"💡 [{selected_boss}] 랭커들의 추천 덱 가져오기")
     btn1, btn2, btn3 = st.columns([2, 2, 1])
@@ -134,8 +36,8 @@ def draw_preset_buttons(selected_boss, original_record=None):
         
         conf1, conf2 = st.columns(2)
         with conf1:
-            st.button("예 (추천 덱으로 덮어쓰기)", type="primary", width='stretch', 
-                      on_click=confirm_preset_callback, args=(pending["boss"], pending["type"]))
+            st.button("예 (추천 덱으로 덮어쓰기)", type="primary", width='stretch')
+            confirm_preset_callback(pending["boss"], pending["type"])
         with conf2:
             st.button("아니요 (취소)", width='stretch', on_click=cancel_preset_callback)
 
@@ -260,3 +162,113 @@ def draw_character_slots():
 
     # 💡 4명의 캐릭터 정보가 담긴 4개의 리스트를 밖으로 던져줍니다!
     return selected_chars, selected_weapons, portrays, resonances, selected_mods
+
+def draw_record_form(mode="insert", default_data=None, record_id=""):
+    """
+    등록/수정 UI를 통합해서 그려주고, 
+    유저가 입력한 데이터(raw_data, images)와 제출 버튼 클릭 여부(submit_btn)를 반환합니다.
+    """
+    if default_data is None:
+        default_data = {}
+    with st.expander("🔗 덱 코드로 파티 정보 자동 기입하기", expanded=False):
+        st.caption("공유받은 8자리 코드나 전체 링크를 입력하면 캐릭터 세팅이 자동으로 채워집니다.")
+        # 1. 입력창과 버튼을 나란히 배치
+        code_col1, code_col2 = st.columns([7.5, 2.5], vertical_alignment="bottom")
+        
+        with code_col1:
+            input_deck_val = st.text_input(
+                "덱 코드 또는 링크 붙여넣기", 
+                placeholder="예: D5822CD4 또는 https://...",
+                key="deck_code_input_field"
+            ).strip()
+            
+        with code_col2:
+            if st.button("🚀 불러오기", width='stretch', type="primary"):
+                code_to_deck(input_deck_val)
+            st.markdown("<div style='margin-bottom: 20px;'></div>", unsafe_allow_html=True) # 약간의 여백
+    st.divider()
+    st.markdown("### 👹 보스 및 기본 정보")
+    col1, col2 = st.columns(2)
+    
+    # 💡 보스 초기값 세팅 (기존 보스가 리스트에 없으면 0번 인덱스)
+    boss_list = CURRENT_SEASON_BOSSES
+    boss_val = default_data.get("boss")
+    boss_idx = boss_list.index(boss_val) if boss_val in boss_list else 0
+    
+    with col1:
+        boss = st.selectbox("보스 선택", boss_list, index=boss_idx, key=f"boss_{mode}_{record_id}")
+    with col2:
+        score = st.number_input("🏆 점수", min_value=0, step=10000, value=default_data.get("score", 0), key=f"score_{mode}_{record_id}")
+
+    draw_preset_buttons(boss) # 프리셋 버튼
+    
+    st.divider()
+    col3, col4 = st.columns(2)
+    with col3:
+        if mode == "insert":
+            nickname = st.text_input("👤 닉네임 (최대 10자)", max_chars=10, key="nick_insert", placeholder=st.session_state.get("random_nickname", ""))
+            if not nickname.strip():
+                nickname = st.session_state.get("random_nickname", "")
+        else:
+            # 수정 모드일 때는 닉네임 변경 불가 처리 (보기 전용)
+            st.text_input("👤 닉네임", value=default_data.get("nickname", ""), disabled=True, key=f"nick_edit_{record_id}")
+            nickname = default_data.get("nickname", "")
+            
+    with col4:
+        pwd_label = "🔒 글 비밀번호 (수정/삭제용)" if mode == "insert" else "🔒 글 비밀번호 (권한 확인용)"
+        password = st.text_input(pwd_label, type="password", max_chars=20, key=f"pwd_{mode}_{record_id}")
+
+    st.divider()
+    st.markdown("### 👥 파티 구성")
+    st.caption("💡 팁: 캐릭터와 의지 칸을 클릭하고 키보드로 타자를 치면 빠르게 검색할 수 있습니다!")
+    
+    # 캐릭터 슬롯 컴포넌트 호출
+    selected_chars, selected_weapons, portrays, resonances, selected_mods = draw_character_slots()
+
+    st.divider()
+    st.markdown("### 📝 코멘트 및 영상")
+    comment = st.text_area("💬 파티 운용 팁 (최대 100자)", value=default_data.get("comment", ""), max_chars=100, key=f"comment_{mode}_{record_id}")
+    youtube = st.text_input("📺 유튜브 클리어 영상 링크", value=default_data.get("youtube", ""), key=f"yt_{mode}_{record_id}")
+
+    st.divider()
+    st.markdown("### 📸 인증 사진 첨부")
+
+    proof_b64 = get_image_base64("proof_image_help.webp")
+    portray_b64 = get_image_base64("portray_help_img.webp")
+
+    proof_help_msg = f"""
+    **[인증 캡처 예시]** 아래 사진처럼 레이드 결과창 전체가 선명하게 보이도록 캡처해 주세요!
+
+    ![점수 인증 예시](data:image/webp;base64,{proof_b64})
+    """
+
+    portray_help_msg = f"""
+    **[형상 캡처 예시]** 핀 기능을 이용하여 참가한 4명의 캐릭터가 모두 화면에 나오게 찍어주세요.
+
+    ![형상 인증 예시](data:image/webp;base64,{portray_b64})
+    """
+    
+    if mode == "insert":
+        # 등록 시에는 사진 필수로 받음 + 도움말 표시
+        proof_img = st.file_uploader("클리어 점수 인증 캡처 (필수)", type=["png", "jpg", "jpeg", "webp"], key="proof_insert", help=proof_help_msg, max_upload_size=10)
+        portray_img = st.file_uploader("캐릭터 형상 인증 캡처 (필수)", type=["png", "jpg", "jpeg", "webp"], key="portray_insert", help= portray_help_msg, max_upload_size=10)
+        btn_label = "🚀 등록 요청하기"
+    else:
+        # 수정 시에는 사진 선택 (안 올리면 기존 것 유지)
+        st.caption("💡 새로운 사진을 업로드하지 않으면 **기존에 올렸던 사진이 그대로 유지**됩니다!")
+        proof_img = st.file_uploader("새로운 클리어 점수 인증 캡처", type=["png", "jpg", "jpeg", "webp"], key=f"proof_edit_{record_id}", max_upload_size=10)
+        portray_img = st.file_uploader("새로운 캐릭터 형상 인증 캡처", type=["png", "jpg", "jpeg", "webp"], key=f"portray_edit_{record_id}", max_upload_size=10)
+        btn_label = "💾 모든 정보 수정하기"
+
+    # 최종 제출 버튼
+    submit_btn = st.button(btn_label, type="primary", width='stretch')
+
+    # 💡 흩어져 있는 변수들을 다 예쁘게 모아서 리턴합니다!
+    raw_data = {
+        "boss": boss, "score": score, "nickname": nickname, "password": password,
+        "chars": selected_chars, "weapons": selected_weapons, "portrays": portrays,
+        "resonances": resonances, "mods": selected_mods, "comment": comment, "youtube": youtube
+    }
+    images = {"proof": proof_img, "portray": portray_img}
+
+    return submit_btn, raw_data, images

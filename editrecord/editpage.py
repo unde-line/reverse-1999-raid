@@ -3,7 +3,7 @@ from editrecord.register import show_register_popup
 from editrecord.edit import show_edit_popup
 from editrecord.delete import show_delete_popup
 from services.components import go_to_detail_page
-from editrecord.editUI import clear_all_inputs_action
+from editrecord.editsystem import clear_all_inputs_action
 import services.DB
 
 def edit_page_display():

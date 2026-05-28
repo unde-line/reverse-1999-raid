@@ -102,19 +102,6 @@ def draw_character_card(record):
                     st.markdown(f"<div class='porreso'>{mod_val}</div>", unsafe_allow_html=True)
                 elif reso_val >= 10 and mod_val == "게시하지 않음":
                     st.markdown(f"<div class='porreso'>공명 변조 게시하지 않음</div>", unsafe_allow_html=True)
-                else:
-                    debug_msg = f"""
-                    <div style='color: #FF4B4B; font-size: 11px; text-align: center; margin-top: 10px; line-height: 1.2;'>
-                        🚨 매칭 실패<br>
-                        이름: {char_name}<br>
-                        블록: [{char_block}]<br>
-                        변조: {mod_val}
-                    </div>
-                    """
-                    st.markdown(debug_msg, unsafe_allow_html=True)
-
-                
-        st.markdown('</div>', unsafe_allow_html=True)
 
 
 def get_paginated_data(data, page_key, items_per_page=10):
@@ -212,3 +199,15 @@ def go_to_detail_page(item, prev_page, boss_name):
     st.session_state.previous_page = prev_page  # 이전 페이지 정보도 저장
     
     st.switch_page("pages/detail.py")  # 상세 페이지로 이동 
+
+def whats_name_of_title(title):
+    if title == "best_overall":
+        return "세계 최강자"
+    elif title == "under_2_portray":
+        return "2형까진 무과금임"
+    elif title == "no_portray":
+        return "명함단은 승리한다"
+    elif title =="respect":
+        return "너흰 싹 다 개추다"
+    else:
+        return

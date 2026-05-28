@@ -2,7 +2,7 @@
 
 import streamlit as st
 from services.DB import get_character_pickrate, get_recommended_decks, get_hall_of_fame_data, CHAR_IMG, WEAPON_IMG, call_records
-from services.config import BOSS_BG_URLS
+from services.config import BOSS_BG_URLS, HOW_TO_GET_SCORE
 from services.components import draw_ranking_card, go_to_detail_page
 from services.utils import load_css
 
@@ -32,7 +32,7 @@ def boss_page_display(boss_name=None):
             
         with col2:
             st.subheader("💡 보스 기믹 및 설명")
-            st.write("3.5 버전 이후 업데이트 예정입니다.")
+            st.write(HOW_TO_GET_SCORE.get(boss_name, "추가 될 예정입니다."))
             
             st.divider() # 가로줄
             
@@ -78,47 +78,53 @@ def boss_page_display(boss_name=None):
             st.caption("가장 안정적인 국민 조합")
 
             stable_info = recommended_decks.get("stable_deck", {})
-            stable_chars = stable_info.get("chars")
-            stable_weapons = stable_info.get("weapons")
-            
-            if stable_chars and stable_weapons:
-                # zip을 써서 캐릭터와 의지를 한 번에 묶어서 출력합니다.
-                deck_stable_html = "<div class='deck-row'>"
-                for char, weapon in zip(stable_chars, stable_weapons):
-                    c_stable_img = CHAR_IMG.get(char)
-                    w_stable_img = WEAPON_IMG.get(weapon)
-                    deck_stable_html += f"""
+            if stable_info:
+                stable_chars = stable_info.get("chars")
+                stable_weapons = stable_info.get("weapons")
+                
+                if stable_chars and stable_weapons:
+                    # zip을 써서 캐릭터와 의지를 한 번에 묶어서 출력합니다.
+                    deck_stable_html = "<div class='deck-row'>"
+                    for char, weapon in zip(stable_chars, stable_weapons):
+                        c_stable_img = CHAR_IMG.get(char)
+                        w_stable_img = WEAPON_IMG.get(weapon)
+                        deck_stable_html += f"""
 <div class="stat_info">
     <img src="{c_stable_img}" class="image_stat">
     <div class="char_caption">{char}</div>
     <img src="{w_stable_img}" class="weapon_stat">
 </div>
 """
-                deck_stable_html += "</div>"
-                st.markdown(deck_stable_html, unsafe_allow_html=True)
+                    deck_stable_html += "</div>"
+                    st.markdown(deck_stable_html, unsafe_allow_html=True)
+            else:
+                st.info("아직 등록되지 않았습니다.")
     with rec2:
         with st.container(border=True):
             st.markdown("#### 🔹 3,000만 점 고점 돌파")
             st.caption("랭커들을 위한 극한의 조합")
             # 덱 이미지 4개
             high_info = recommended_decks.get("high_score_deck", {})
-            high_chars = high_info.get("chars")
-            high_weapons = high_info.get("weapons")
-            
-            if high_chars and high_weapons:
-                deck_high_html = "<div class='deck-row'>"
-                for char, weapon in zip(high_chars, high_weapons):
-                    c_high_img = CHAR_IMG.get(char)
-                    w_high_img = WEAPON_IMG.get(weapon)
-                    deck_high_html += f"""
+            if high_info:
+                high_chars = high_info.get("chars")
+                high_weapons = high_info.get("weapons")
+                
+                if high_chars and high_weapons:
+                    deck_high_html = "<div class='deck-row'>"
+                    for char, weapon in zip(high_chars, high_weapons):
+                        c_high_img = CHAR_IMG.get(char)
+                        w_high_img = WEAPON_IMG.get(weapon)
+                        deck_high_html += f"""
 <div class="stat_info">
     <img src="{c_high_img}" class="image_stat">
     <div class="char_caption">{char}</div>
     <img src="{w_high_img}" class="weapon_stat">
 </div>
 """
-                deck_high_html += "</div>"
-                st.markdown(deck_high_html, unsafe_allow_html=True)
+                    deck_high_html += "</div>"
+                    st.markdown(deck_high_html, unsafe_allow_html=True)
+            else:
+                st.info("아직 등록되지 않았습니다.")
     st.write("")
 
     # ==========================================
