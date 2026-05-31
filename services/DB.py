@@ -234,7 +234,7 @@ def call_records(record_id):
     """
     try:
         response = supabase.table("raid_records") \
-            .select("nickname, score, characters, weapons, portrays, resonances, comment, proof_url, video_url") \
+            .select("nickname, score, characters, weapons, portrays, resonances, comment, proof_url, video_url, status") \
             .eq("id", record_id) \
             .single() \
             .execute()
