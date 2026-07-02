@@ -4,12 +4,13 @@ BOSS_BG_URLS = {
     "급성 선홍증": "https://vkndropbpkorenidgply.supabase.co/storage/v1/object/public/game_assets/rmqtjdtjsghdwmd.webp",
     "신앙의 이동": "https://vkndropbpkorenidgply.supabase.co/storage/v1/object/public/game_assets/tlsdkddmldlehd.webp",
     "탈피의 잔향": "https://vkndropbpkorenidgply.supabase.co/storage/v1/object/public/game_assets/xkfvldmlwksgid.webp",
-    "신앙의 이동 II형": "https://vkndropbpkorenidgply.supabase.co/storage/v1/object/public/game_assets/tlsdkddmldlehdIIgud.webp"
+    "신앙의 이동 II형": "https://vkndropbpkorenidgply.supabase.co/storage/v1/object/public/game_assets/tlsdkddmldlehdIIgud.webp",
+    "한계 초월의 죄수 II형": "https://vkndropbpkorenidgply.supabase.co/storage/v1/object/public/game_assets/gksrPchdnjfdmlwhltndlgud.webp"
 }
 CURRENT_SEASON_BOSSES = [
-    "신앙의 이동 II형", 
-    "급성 선홍증", 
-    "탈피의 잔향"
+    "한계 초월의 죄수 II형",
+    "신앙의 이동 II형",
+    "괴멸의 궤도"
 ]
 
 HOW_TO_GET_SCORE = {

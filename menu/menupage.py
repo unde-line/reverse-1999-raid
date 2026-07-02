@@ -11,7 +11,7 @@ def menu_page_display():
     btn_col1, btn_col2 = st.columns([8, 2])
     with btn_col1:
         st.title("리버스: 1999 레이드 기록소")
-        st.subheader("3.5버전 <터과이즈 뱀 클럽> 갈기의 게시판 진행 상황")
+        st.subheader("3.6버전 <사람은 어디로 가는가> 갈기의 게시판 진행 상황")
 
     with btn_col2:
         if st.button("💡 이용 가이드", width='stretch'):
